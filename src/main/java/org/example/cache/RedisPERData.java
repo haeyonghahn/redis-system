@@ -1,11 +1,13 @@
 package org.example.cache;
 
+import java.io.Serializable;
+
 /**
  * Cache redis에 담길 데이터구조 입니다.
  * @param cachedData 캐시의 데이터입니다.
  * @param expiryGapMs 실제 DB 조회 시간입니다.
  */
-public class RedisPERData<T> {
+public class RedisPERData<T> implements Serializable {
 	
 	private T cachedData;
     private int expiryGapMs;

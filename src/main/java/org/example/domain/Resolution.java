@@ -1,6 +1,8 @@
 package org.example.domain;
 
-public class Resolution {
+import java.io.Serializable;
+
+public class Resolution implements Serializable {
 
     private String companyCode;
     private String profitCenterCode;

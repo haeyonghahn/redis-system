@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import org.example.cache.RedisCacheInfo;
 import org.example.cache.RedisPERCache;
 import org.example.cache.RedisPERData;
+import org.springframework.data.redis.core.RedisTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,6 +12,10 @@ import java.util.List;
 public class ResolutionCache extends RedisPERCache<List<Resolution>> {
 
 	private static final int RESOLUTION_LIST_CACHE_TTL = 60;
+
+	public ResolutionCache(RedisTemplate<String, Object> redisTemplate) {
+		super(redisTemplate);
+	}
 
 	@Override
 	protected TypeReference<RedisPERData<List<Resolution>>> getTypeReference() throws Exception {

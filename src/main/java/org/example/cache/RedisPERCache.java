@@ -1,16 +1,24 @@
 package org.example.cache;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.example.utils.RedisUtil;
+import org.springframework.data.redis.core.RedisTemplate;
 
 public abstract class RedisPERCache<T> {
 
 	private final ObjectMapper objectMapper = new ObjectMapper();
+	private final RedisTemplate<String, Object> redisTemplate;
+
+	public RedisPERCache(RedisTemplate<String, Object> redisTemplate) {
+		this.redisTemplate = redisTemplate;
+	}
 
 	public T perFetch(String key, double beta) throws Exception {
 		try {
@@ -30,7 +38,13 @@ public abstract class RedisPERCache<T> {
 			 * ex) SETEX FN123456677 60 [{"companyCode":"5000","profitCenterCode":"1000","resolutionCode":"FN123456677"}]
 			 *     PTTL FN123456677 -> 60000밀리초
 			 */
-			long expiryTtl = RedisUtil.pttl(cacheInfo.getKey());
+//			long expiryTtl = RedisUtil.pttl(cacheInfo.getKey());
+			Long expiryTtl = redisTemplate.boundValueOps(cacheInfo.getKey()).getExpire();
+			if (expiryTtl != null && expiryTtl > 0) {
+				expiryTtl = expiryTtl * 1000L;
+			} else {
+				expiryTtl = -2L;
+			}
 
 			/*
 			 * computationTime * beta * -log(random()) >= TTL
@@ -51,10 +65,10 @@ public abstract class RedisPERCache<T> {
 	
 	private RedisPERData<T> findRedisCache(String key, TypeReference<RedisPERData<T>> typeReference) throws Exception {
 		try {
-			String value = RedisUtil.get(key);
+//			String value = RedisUtil.get(key);
+			Object value = redisTemplate.opsForValue().get(key);
 			if (value != null) {
-				byte[] data = value.getBytes();
-				return deserialize(data, typeReference);
+				return deserialize(convertToBytes(value), typeReference);
 			} else {
 				return null;
 			}
@@ -83,9 +97,22 @@ public abstract class RedisPERCache<T> {
 			 * ex) 특정 키에 대해 60초 동안 유효한 값을 설정하시오.
 			 * SETEX FN123456677 60 [{"companyCode":"5000","profitCenterCode":"1000","resolutionCode":"FN123456677"}]
 			 */
-			RedisUtil.setex(cacheInfo.getKey(), cacheInfo.getCacheKeepSecond(), serialize(data));
+//			RedisUtil.setex(cacheInfo.getKey(), cacheInfo.getCacheKeepSecond(), serialize(data));
+			redisTemplate.opsForValue().set(cacheInfo.getKey(), data, cacheInfo.getCacheKeepSecond(), TimeUnit.SECONDS);
 
 			return resultFromDb;
+		} catch (Exception e) {
+			throw new Exception(e);
+		}
+	}
+
+	private byte[] convertToBytes(Object object) throws Exception {
+		try {
+			ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+			ObjectOutputStream objectOutputStream = new ObjectOutputStream(byteArrayOutputStream);
+
+			objectOutputStream.writeObject(object);
+			return byteArrayOutputStream.toByteArray();
 		} catch (Exception e) {
 			throw new Exception(e);
 		}
@@ -98,7 +125,7 @@ public abstract class RedisPERCache<T> {
             throw new RuntimeException("Deserialization error", e);
         }
 	}
-	
+
 	private byte[] serialize(RedisPERData<T> data) {
 		try {
             return objectMapper.writeValueAsBytes(data);
