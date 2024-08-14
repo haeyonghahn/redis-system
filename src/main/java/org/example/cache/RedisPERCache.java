@@ -68,7 +68,7 @@ public abstract class RedisPERCache<T> {
 //			String value = RedisUtil.get(key);
 			Object value = redisTemplate.opsForValue().get(key);
 			if (value != null) {
-				return deserialize(convertToBytes(value), typeReference);
+				return deserialize(value.toString(), typeReference);
 			} else {
 				return null;
 			}
@@ -106,19 +106,7 @@ public abstract class RedisPERCache<T> {
 		}
 	}
 
-	private byte[] convertToBytes(Object object) throws Exception {
-		try {
-			ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-			ObjectOutputStream objectOutputStream = new ObjectOutputStream(byteArrayOutputStream);
-
-			objectOutputStream.writeObject(object);
-			return byteArrayOutputStream.toByteArray();
-		} catch (Exception e) {
-			throw new Exception(e);
-		}
-	}
-
-	private <V> V deserialize(byte[] data, TypeReference<V> typeReference) {
+	private <V> V deserialize(String data, TypeReference<V> typeReference) {
 		try {
 			return objectMapper.readValue(data, typeReference);
 		} catch (IOException e) {
