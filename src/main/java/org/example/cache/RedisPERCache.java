@@ -68,7 +68,7 @@ public abstract class RedisPERCache<T> {
 //			String value = RedisUtil.get(key);
 			Object value = redisTemplate.opsForValue().get(key);
 			if (value != null) {
-				return deserialize(value.toString(), typeReference);
+				return (RedisPERData<T>) value;
 			} else {
 				return null;
 			}
