@@ -1,2 +1,11 @@
 server:
   port: 8083
+
+spring:
+  # Redis 설정
+  redis:
+    password: 1111
+    sentinel:
+      master: mymaster
+      password: 1111
+      nodes: 127.0.0.1:26379,127.0.0.1:26380,127.0.0.1:26381
