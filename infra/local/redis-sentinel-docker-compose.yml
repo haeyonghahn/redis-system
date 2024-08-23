@@ -141,6 +141,7 @@ services:
 
   local-redis-system:
     image: redis-system:latest
+    container_name: local-redis-system
     ports:
       - "8083:8083"
     networks:
