@@ -2,10 +2,5 @@ server:
   port: 8083
 
 spring:
-  # Redis 설정
-  redis:
-    password: 1111
-    sentinel:
-      master: mymaster
-      password: 1111
-      nodes: local-redis-sentinel1:26379,local-redis-sentinel2:26380,local-redis-sentinel3:26381
+  profiles:
+    active: ${PROFILES_ACTIVE}

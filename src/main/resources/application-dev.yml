@@ -1,0 +1,8 @@
+spring:
+  # Redis 설정
+  redis:
+    password: 1111
+    sentinel:
+      master: mymaster
+      password: 1111
+      nodes: dev-redis-sentinel1:26379,dev-redis-sentinel2:26380,dev-redis-sentinel3:26381
