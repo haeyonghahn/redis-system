@@ -1,6 +1,6 @@
 spring:
   # Redis 설정
   redis:
-    host: 127.0.0.1
+    host: local-redis-master
     port: 6379
     password: 1111

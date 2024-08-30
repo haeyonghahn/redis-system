@@ -5,4 +5,4 @@ spring:
     sentinel:
       master: mymaster
       password: 1111
-      nodes: dev-redis-sentinel1:26379,dev-redis-sentinel2:26380,dev-redis-sentinel3:26381
+      nodes: local-redis-sentinel1:26379,local-redis-sentinel2:26380,local-redis-sentinel3:26381
